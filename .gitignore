@@ -7,4 +7,5 @@
 /[U|u]ser[S|s]ettings/
 *.csproj
 *.sln
+*.slnx
 *.suo
