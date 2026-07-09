@@ -9,7 +9,9 @@ public class PlantStatusController : MonoBehaviour
     [SerializeField]
     private int ashQuantity = 0;
 
-    
+    [SerializeField]
+    private float infestationTime = 3f;
+
     public PlantStatus currentStatus;
     private PlantStatus startStatus;
     private PlantStatus lastStatus;
@@ -65,7 +67,7 @@ public class PlantStatusController : MonoBehaviour
 
     IEnumerator InfestingStatus()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(infestationTime);
         ashQuantity = 2;
         currentStatus = PlantStatus.Infested;
     }
