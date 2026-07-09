@@ -31,7 +31,7 @@ public class HeatmapGrid
 
     public bool IsWalkable(Vector2Int cell) =>
         IsValid(cell) && walkable[cell.x, cell.y];
-    private bool IsValid(Vector2Int cell) =>
+    public bool IsValid(Vector2Int cell) =>
         cell.x >= 0 && cell.x < width && cell.y >= 0 && cell.y < height;
 
     public int Width => width;

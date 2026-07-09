@@ -1,10 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class GardenManager : MonoBehaviour
 {
     [Header("Riferimenti Tilemap")]
-    [SerializeField] private Tilemap wallTilemap; 
+    [SerializeField] private Tilemap wallTilemap;
+    private List<Vector2Int> testPath;
 
     private HeatmapGrid heatmap;
     private BoundsInt bounds;
@@ -48,8 +50,22 @@ public class GardenManager : MonoBehaviour
 
     void Start()
     {
-        heatmap.SetHeat(new Vector2Int(1, 1), 1.0f);
-        heatmap.SetHeat(new Vector2Int(2, 1), 0.6f);
+        if (heatmap.IsWalkable(new Vector2Int(1, 1)))
+        {
+            heatmap.SetHeat(new Vector2Int(1, 1), 1.0f);
+            heatmap.SetHeat(new Vector2Int(2, 1), 0.6f);
+        }
+
+        // TEST PATHFINDING: Calcoliamo un percorso da (0,0) a (5,5) - o un punto oltre i tuoi muri
+        Vector2Int partenza = new Vector2Int(0, 0);
+        Vector2Int destinazione = new Vector2Int(5, 5);
+
+        testPath = AStarPathfinding.FindPath(heatmap, partenza, destinazione);
+
+        if (testPath != null)
+            Debug.Log($"Percorso trovato! Composto da {testPath.Count} passi.");
+        else
+            Debug.LogWarning("Nessun percorso trovato. Destinazione bloccata o irraggiungibile.");
     }
 
     void OnDrawGizmos()
@@ -75,7 +91,11 @@ public class GardenManager : MonoBehaviour
                 {
                     if (!heatmap.IsWalkable(cell))
                     {
-                        Gizmos.color = new Color(0, 0, 0, 0.7f); 
+                        Gizmos.color = new Color(0, 0, 0, 0.7f); // Muro
+                    }
+                    else if (testPath != null && testPath.Contains(cell))
+                    {
+                        Gizmos.color = new Color(0f, 0.8f, 1f, 0.8f); // Cella del percorso (Azzurro)
                     }
                     else
                     {
@@ -84,13 +104,8 @@ public class GardenManager : MonoBehaviour
                         Gizmos.color = heatColor;
                     }
                 }
-                else
-                {
-                    
-                    Gizmos.color = wallTilemap.HasTile(tilePos) ? new Color(0, 0, 0, 0.4f) : new Color(1, 1, 1, 0.1f);
-                }
 
-                
+
                 Gizmos.DrawCube(worldPos, new Vector3(0.9f, 0.9f, 0.1f));
             }
         }
