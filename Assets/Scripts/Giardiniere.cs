@@ -7,19 +7,22 @@ public class Giardiniere : MonoBehaviour
     [SerializeField] private int searchRadius = 5;
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private int neighborRadius = 1;
+    [SerializeField] private float wateringDuration = 3f;
 
     private HeatmapGrid heatmap;
     private List<Vector2Int> currentPath;
     private int pathIndex;
     private Vector2Int currentTarget;
-    private bool isBusy; 
+    private bool isBusy;
+
+    private PlantStatusController targetPlant;
+    private float wateringTimer;
 
     void Start()
     {
         heatmap = gardenManager.Grid;
         heatmap.OnHeatChanged += HandleHeatChanged;
 
-        
         HandleHeatChanged(default, 0f);
     }
 
@@ -55,10 +58,30 @@ public class Giardiniere : MonoBehaviour
 
     void Update()
     {
-        if (isBusy) return;
+        if (isBusy)
+        {
+            HandleWatering();
+            return;
+        }
         if (currentPath == null || pathIndex >= currentPath.Count) return;
 
         MoveAlongPath();
+    }
+
+    void HandleWatering()
+    {
+        if (targetPlant == null)
+        {
+            isBusy = false;
+            return;
+        }
+
+        wateringTimer += Time.deltaTime;
+        if (wateringTimer >= wateringDuration)
+        {
+            targetPlant.Water();
+            isBusy = false;
+        }
     }
 
     void MoveAlongPath()
@@ -71,10 +94,16 @@ public class Giardiniere : MonoBehaviour
             pathIndex++;
             if (pathIndex >= currentPath.Count)
             {
-                isBusy = true;
-                // TODO: animazione/logica di annaffiatura
+                StartWatering();
             }
         }
+    }
+
+    void StartWatering()
+    {
+        isBusy = true;
+        targetPlant = gardenManager.GetPlantAt(currentTarget);
+        wateringTimer = 0f;
     }
 
     bool HasReachedCurrentWaypoint(Vector3 targetWorldPos)

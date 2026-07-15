@@ -11,6 +11,9 @@ public class GardenManager : MonoBehaviour
     private HeatmapGrid heatmap;
     private BoundsInt bounds;
 
+    [Header("Test Mode")]
+    [SerializeField] private bool useTestHeatSources = false;
+
     private List<Vector2Int> activeHeatCells = new List<Vector2Int>();
     private float heatChangeTimer;
     private const float heatChangeInterval = 5f;
@@ -22,7 +25,8 @@ public class GardenManager : MonoBehaviour
         [Range(0f, 1f)] public float heat;
     }
 
-    [SerializeField] private List<HeatSource> testHeatSources = new List<HeatSource>
+    [SerializeField]
+    private List<HeatSource> testHeatSources = new List<HeatSource>
     {
         new HeatSource { cell = new Vector2Int(1, 1), heat = 1.0f },
         new HeatSource { cell = new Vector2Int(2, 1), heat = 0.6f },
@@ -32,7 +36,6 @@ public class GardenManager : MonoBehaviour
     };
 
     public HeatmapGrid Grid => heatmap;
-
 
     void Awake()
     {
@@ -71,11 +74,14 @@ public class GardenManager : MonoBehaviour
 
     void Start()
     {
-        InitializeTestHeat();
+        if (useTestHeatSources)
+            InitializeTestHeat();
     }
 
     void Update()
     {
+        if (!useTestHeatSources) return;
+
         heatChangeTimer += Time.deltaTime;
         if (heatChangeTimer >= heatChangeInterval)
         {
@@ -159,9 +165,9 @@ public class GardenManager : MonoBehaviour
         Vector3Int realCell = new Vector3Int(cell.x + bounds.xMin, cell.y + bounds.yMin, 0);
         return wallTilemap.GetCellCenterWorld(realCell);
     }
+
     void OnDrawGizmos()
     {
-        
         if (wallTilemap == null) return;
 
         BoundsInt currentBounds = wallTilemap.cellBounds;
@@ -196,9 +202,21 @@ public class GardenManager : MonoBehaviour
                     }
                 }
 
-
                 Gizmos.DrawCube(worldPos, new Vector3(0.9f, 0.9f, 0.1f));
             }
         }
+    }
+
+    private Dictionary<Vector2Int, PlantStatusController> plants = new Dictionary<Vector2Int, PlantStatusController>();
+
+    public void RegisterPlant(Vector2Int cell, PlantStatusController plant)
+    {
+        plants[cell] = plant;
+    }
+
+    public PlantStatusController GetPlantAt(Vector2Int cell)
+    {
+        plants.TryGetValue(cell, out var plant);
+        return plant;
     }
 }
