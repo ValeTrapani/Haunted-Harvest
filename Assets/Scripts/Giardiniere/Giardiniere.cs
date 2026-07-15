@@ -7,6 +7,7 @@ public class Giardiniere : MonoBehaviour
     [SerializeField] private int searchRadius = 5;
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private int neighborRadius = 1;
+    [SerializeField] private float minCurableHeat = 0.5f;
     [SerializeField] private float wateringDuration = 3f;
 
     private HeatmapGrid heatmap;
@@ -40,7 +41,7 @@ public class Giardiniere : MonoBehaviour
     void HandleHeatChanged(Vector2Int changedCell, float newHeat)
     {
         Vector2Int myCell = GetMyCell();
-        Vector2Int bestCell = heatmap.FindHottestCell(myCell, searchRadius, neighborRadius);
+        Vector2Int bestCell = heatmap.FindHottestCell(myCell, searchRadius, neighborRadius, minCurableHeat);
 
         if (bestCell != currentTarget)
         {

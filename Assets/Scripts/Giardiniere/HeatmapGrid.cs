@@ -31,7 +31,7 @@ public class HeatmapGrid
         }
     }
 
-    public Vector2Int FindHottestCell(Vector2Int currentCell, int searchRadius, int neighborRadius = 0)
+    public Vector2Int FindHottestCell(Vector2Int currentCell, int searchRadius, int neighborRadius = 0, float minCurableHeat = 0f)
     {
         Candidate best = default;
         bool hasBest = false;
@@ -46,6 +46,9 @@ public class HeatmapGrid
                     continue;
 
                 float heat = GetHeat(cell);
+                if (heat < minCurableHeat)
+                    continue;
+
                 int distance = Mathf.Abs(x) + Mathf.Abs(y);
                 float localHeat = neighborRadius > 0 ? GetLocalHeatSum(cell, neighborRadius) : 0f;
 

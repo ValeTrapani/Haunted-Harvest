@@ -29,7 +29,7 @@ public class GardenManager : MonoBehaviour
     private List<HeatSource> testHeatSources = new List<HeatSource>
     {
         new HeatSource { cell = new Vector2Int(1, 1), heat = 1.0f },
-        new HeatSource { cell = new Vector2Int(2, 1), heat = 0.6f },
+        new HeatSource { cell = new Vector2Int(2, 1), heat = 0.1f },
         new HeatSource { cell = new Vector2Int(5, 6), heat = 1.0f },
         new HeatSource { cell = new Vector2Int(5, 2), heat = 1.0f },
         new HeatSource { cell = new Vector2Int(5, 7), heat = 1.0f }

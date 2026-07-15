@@ -1,6 +1,4 @@
 using System.Collections;
-using System.ComponentModel;
-using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 
 public class PlantStatusController : MonoBehaviour
@@ -56,8 +54,8 @@ public class PlantStatusController : MonoBehaviour
         float heat = currentStatus switch
         {
             PlantStatus.Healthy => 0f,
-            PlantStatus.Infesting => 0.5f,
-            PlantStatus.Infested => 1f,
+            PlantStatus.Infesting => 1f,
+            PlantStatus.Infested => 0.1f,
             _ => 0f
         };
         gardenManager.Grid.SetHeat(myCell, heat);
