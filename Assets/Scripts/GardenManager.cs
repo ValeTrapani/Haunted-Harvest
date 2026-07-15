@@ -13,6 +13,7 @@ public class GardenManager : MonoBehaviour
 
     public HeatmapGrid Grid => heatmap;
 
+
     void Awake()
     {
         InitializeGrid();
@@ -54,20 +55,22 @@ public class GardenManager : MonoBehaviour
         {
             heatmap.SetHeat(new Vector2Int(1, 1), 1.0f);
             heatmap.SetHeat(new Vector2Int(2, 1), 0.6f);
+            heatmap.SetHeat(new Vector2Int(5, 6), 1.0f);
+            heatmap.SetHeat(new Vector2Int(5, 2), 1.0f);
+            heatmap.SetHeat(new Vector2Int(5, 7), 1.0f);
         }
-
-        // TEST PATHFINDING: Calcoliamo un percorso da (0,0) a (5,5) - o un punto oltre i tuoi muri
-        Vector2Int partenza = new Vector2Int(0, 0);
-        Vector2Int destinazione = new Vector2Int(5, 5);
-
-        testPath = AStarPathfinding.FindPath(heatmap, partenza, destinazione);
-
-        if (testPath != null)
-            Debug.Log($"Percorso trovato! Composto da {testPath.Count} passi.");
-        else
-            Debug.LogWarning("Nessun percorso trovato. Destinazione bloccata o irraggiungibile.");
+    }
+    public Vector2Int WorldToHeatmapCell(Vector3 worldPos)
+    {
+        Vector3Int cell = wallTilemap.WorldToCell(worldPos);
+        return new Vector2Int(cell.x - bounds.xMin, cell.y - bounds.yMin);
     }
 
+    public Vector3 HeatmapCellToWorld(Vector2Int cell)
+    {
+        Vector3Int realCell = new Vector3Int(cell.x + bounds.xMin, cell.y + bounds.yMin, 0);
+        return wallTilemap.GetCellCenterWorld(realCell);
+    }
     void OnDrawGizmos()
     {
         
