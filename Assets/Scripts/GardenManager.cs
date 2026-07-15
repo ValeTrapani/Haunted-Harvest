@@ -11,6 +11,10 @@ public class GardenManager : MonoBehaviour
     private HeatmapGrid heatmap;
     private BoundsInt bounds;
 
+    private List<Vector2Int> activeHeatCells = new List<Vector2Int>();
+    private float heatChangeTimer;
+    private const float heatChangeInterval = 5f;
+
     [System.Serializable]
     public struct HeatSource
     {
@@ -70,16 +74,80 @@ public class GardenManager : MonoBehaviour
         InitializeTestHeat();
     }
 
+    void Update()
+    {
+        heatChangeTimer += Time.deltaTime;
+        if (heatChangeTimer >= heatChangeInterval)
+        {
+            heatChangeTimer = 0f;
+            RefreshHeatPositions();
+        }
+    }
+
     void InitializeTestHeat()
+    {
+        activeHeatCells.Clear();
+        foreach (HeatSource source in testHeatSources)
+        {
+            SpawnHeat(source.cell, source.heat);
+        }
+    }
+
+    void RefreshHeatPositions()
+    {
+        ClearActiveHeat();
+        SpawnRandomHeat();
+    }
+
+    void ClearActiveHeat()
+    {
+        foreach (Vector2Int cell in activeHeatCells)
+        {
+            heatmap.SetHeat(cell, 0f);
+        }
+        activeHeatCells.Clear();
+    }
+
+    void SpawnRandomHeat()
     {
         foreach (HeatSource source in testHeatSources)
         {
-            if (heatmap.IsWalkable(source.cell))
-            {
-                heatmap.SetHeat(source.cell, source.heat);
-            }
+            Vector2Int randomCell = GetRandomWalkableCell();
+            if (randomCell.x < 0)
+                break;
+
+            SpawnHeat(randomCell, source.heat);
         }
     }
+
+    Vector2Int GetRandomWalkableCell()
+    {
+        List<Vector2Int> walkableCells = new List<Vector2Int>();
+        for (int x = 0; x < heatmap.Width; x++)
+        {
+            for (int y = 0; y < heatmap.Height; y++)
+            {
+                Vector2Int cell = new Vector2Int(x, y);
+                if (heatmap.IsWalkable(cell))
+                    walkableCells.Add(cell);
+            }
+        }
+
+        if (walkableCells.Count == 0)
+            return new Vector2Int(-1, -1);
+
+        return walkableCells[Random.Range(0, walkableCells.Count)];
+    }
+
+    void SpawnHeat(Vector2Int cell, float heat)
+    {
+        if (!heatmap.IsWalkable(cell))
+            return;
+
+        heatmap.SetHeat(cell, heat);
+        activeHeatCells.Add(cell);
+    }
+
     public Vector2Int WorldToHeatmapCell(Vector3 worldPos)
     {
         Vector3Int cell = wallTilemap.WorldToCell(worldPos);
