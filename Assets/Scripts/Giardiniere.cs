@@ -41,11 +41,16 @@ public class Giardiniere : MonoBehaviour
 
         if (bestCell != currentTarget)
         {
-            currentTarget = bestCell;
-            currentPath = AStarPathfinding.FindPath(heatmap, myCell, bestCell);
-            pathIndex = 0;
-            isBusy = false;
+            RecalculatePath(myCell, bestCell);
         }
+    }
+
+    void RecalculatePath(Vector2Int myCell, Vector2Int bestCell)
+    {
+        currentTarget = bestCell;
+        currentPath = AStarPathfinding.FindPath(heatmap, myCell, bestCell);
+        pathIndex = 0;
+        isBusy = false;
     }
 
     void Update()
@@ -53,18 +58,27 @@ public class Giardiniere : MonoBehaviour
         if (isBusy) return;
         if (currentPath == null || pathIndex >= currentPath.Count) return;
 
-        Vector3 targetWorldPos = gardenManager.HeatmapCellToWorld(currentPath[pathIndex]);
+        MoveAlongPath();
+    }
 
+    void MoveAlongPath()
+    {
+        Vector3 targetWorldPos = gardenManager.HeatmapCellToWorld(currentPath[pathIndex]);
         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, targetWorldPos) < 0.05f)
+        if (HasReachedCurrentWaypoint(targetWorldPos))
         {
             pathIndex++;
             if (pathIndex >= currentPath.Count)
             {
-                isBusy = true; 
-                // TODO:animazione/logica di annaffiatura
+                isBusy = true;
+                // TODO: animazione/logica di annaffiatura
             }
         }
+    }
+
+    bool HasReachedCurrentWaypoint(Vector3 targetWorldPos)
+    {
+        return Vector3.Distance(transform.position, targetWorldPos) < 0.05f;
     }
 }

@@ -15,12 +15,26 @@ public class HeatmapGrid
         heatValues = new float[width, height];
     }
 
+    private readonly struct Candidate
+    {
+        public readonly Vector2Int Cell;
+        public readonly float Heat;
+        public readonly int Distance;
+        public readonly float LocalHeat;
+
+        public Candidate(Vector2Int cell, float heat, int distance, float localHeat)
+        {
+            Cell = cell;
+            Heat = heat;
+            Distance = distance;
+            LocalHeat = localHeat;
+        }
+    }
+
     public Vector2Int FindHottestCell(Vector2Int currentCell, int searchRadius, int neighborRadius = 0)
     {
-        Vector2Int best = currentCell;
-        float bestHeat = -1f;
-        int bestDistance = int.MaxValue;
-        float bestLocalHeat = -1f;
+        Candidate best = default;
+        bool hasBest = false;
 
         for (int x = -searchRadius; x <= searchRadius; x++)
         {
@@ -35,38 +49,28 @@ public class HeatmapGrid
                 int distance = Mathf.Abs(x) + Mathf.Abs(y);
                 float localHeat = neighborRadius > 0 ? GetLocalHeatSum(cell, neighborRadius) : 0f;
 
-                bool isBetter = false;
+                Candidate candidate = new Candidate(cell, heat, distance, localHeat);
 
-                if (heat > bestHeat)
+                if (!hasBest || IsBetterCandidate(candidate, best))
                 {
-                    isBetter = true;
-                }
-                else if (heat == bestHeat)
-                {
-                    if (distance < bestDistance)
-                    {
-                        isBetter = true;
-                    }
-                    else if (distance == bestDistance)
-                    {
-                        if (neighborRadius > 0 && localHeat > bestLocalHeat)
-                        {
-                            isBetter = true;
-                        }
-                    }
-                }
-
-                if (isBetter)
-                {
-                    best = cell;
-                    bestHeat = heat;
-                    bestDistance = distance;
-                    bestLocalHeat = localHeat;
+                    best = candidate;
+                    hasBest = true;
                 }
             }
         }
 
-        return best;
+        return hasBest ? best.Cell : currentCell;
+    }
+
+    private bool IsBetterCandidate(Candidate candidate, Candidate currentBest)
+    {
+        if (candidate.Heat > currentBest.Heat) return true;
+        if (candidate.Heat < currentBest.Heat) return false;
+
+        if (candidate.Distance < currentBest.Distance) return true;
+        if (candidate.Distance > currentBest.Distance) return false;
+
+        return candidate.LocalHeat > currentBest.LocalHeat;
     }
 
     private float GetLocalHeatSum(Vector2Int cell, int radius)

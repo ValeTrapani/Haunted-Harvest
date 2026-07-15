@@ -11,6 +11,22 @@ public class GardenManager : MonoBehaviour
     private HeatmapGrid heatmap;
     private BoundsInt bounds;
 
+    [System.Serializable]
+    public struct HeatSource
+    {
+        public Vector2Int cell;
+        [Range(0f, 1f)] public float heat;
+    }
+
+    [SerializeField] private List<HeatSource> testHeatSources = new List<HeatSource>
+    {
+        new HeatSource { cell = new Vector2Int(1, 1), heat = 1.0f },
+        new HeatSource { cell = new Vector2Int(2, 1), heat = 0.6f },
+        new HeatSource { cell = new Vector2Int(5, 6), heat = 1.0f },
+        new HeatSource { cell = new Vector2Int(5, 2), heat = 1.0f },
+        new HeatSource { cell = new Vector2Int(5, 7), heat = 1.0f }
+    };
+
     public HeatmapGrid Grid => heatmap;
 
 
@@ -51,13 +67,17 @@ public class GardenManager : MonoBehaviour
 
     void Start()
     {
-        if (heatmap.IsWalkable(new Vector2Int(1, 1)))
+        InitializeTestHeat();
+    }
+
+    void InitializeTestHeat()
+    {
+        foreach (HeatSource source in testHeatSources)
         {
-            heatmap.SetHeat(new Vector2Int(1, 1), 1.0f);
-            heatmap.SetHeat(new Vector2Int(2, 1), 0.6f);
-            heatmap.SetHeat(new Vector2Int(5, 6), 1.0f);
-            heatmap.SetHeat(new Vector2Int(5, 2), 1.0f);
-            heatmap.SetHeat(new Vector2Int(5, 7), 1.0f);
+            if (heatmap.IsWalkable(source.cell))
+            {
+                heatmap.SetHeat(source.cell, source.heat);
+            }
         }
     }
     public Vector2Int WorldToHeatmapCell(Vector3 worldPos)
