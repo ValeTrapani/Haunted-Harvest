@@ -71,9 +71,17 @@ public class Giardiniere : MonoBehaviour
 
     void HandleWatering()
     {
+        
         if (targetPlant == null)
         {
             isBusy = false;
+            return;
+        }
+
+        if (targetPlant.currentStatus == PlantStatus.Infested)
+        {
+            StopWatering();
+            HandleHeatChanged(default, 0f);
             return;
         }
 
@@ -83,6 +91,14 @@ public class Giardiniere : MonoBehaviour
             targetPlant.Water();
             isBusy = false;
         }
+        
+    }
+
+    void StopWatering()
+    {
+        isBusy = false;
+        targetPlant = null;
+        wateringTimer = 0f;
     }
 
     void MoveAlongPath()
